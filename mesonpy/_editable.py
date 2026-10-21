@@ -360,6 +360,7 @@ class MesonpyMetaFinder(importlib.abc.MetaPathFinder):
                 # explicitly set the encoding.
                 with open(log_path, 'r', encoding=getencoding(), errors='backslashreplace') as log:
                     # Skip to the error.
+                    line = ''
                     for line in log:
                         if line.startswith('FAILED: '):
                             break

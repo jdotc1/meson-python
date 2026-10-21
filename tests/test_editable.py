@@ -367,6 +367,22 @@ def test_editable_rebuild_error(package_purelib_and_platlib, tmp_path, verbose):
             path.write_text(code)
 
 
+def test_editable_rebuild_empty_error_log(tmp_path, monkeypatch):
+    monkeypatch.delenv(_editable.VERBOSE, raising=False)
+    tmp_path.joinpath('meson-logs').mkdir()
+    finder = _editable.MesonpyMetaFinder(
+        'silent', {'silent'}, os.fspath(tmp_path),
+        [sys.executable, '-c', 'raise SystemExit(1)'], verbose=False,
+    )
+
+    with pytest.raises(ImportError, match='rebuilding the "silent" editable package failed') as exc:
+        finder.find_spec('silent')
+
+    assert isinstance(exc.value.__cause__, subprocess.CalledProcessError)
+    assert exc.value.__cause__.returncode == 1
+    assert tmp_path.joinpath('meson-logs', 'meson-python-build-log.txt').read_bytes() == b''
+
+
 def test_editable_reconfigure_error(package_purelib_and_platlib, tmp_path):
     with mesonpy._project({'builddir': os.fspath(tmp_path)}) as project:
 

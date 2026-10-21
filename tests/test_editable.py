@@ -368,6 +368,8 @@ def test_editable_rebuild_error(package_purelib_and_platlib, tmp_path, verbose):
 
 
 def test_editable_rebuild_empty_error_log(tmp_path, monkeypatch):
+    # Concurrent rebuilds can truncate the shared log before it is read.
+    # Exercise the empty-log condition without relying on that race.
     monkeypatch.delenv(_editable.VERBOSE, raising=False)
     tmp_path.joinpath('meson-logs').mkdir()
     finder = _editable.MesonpyMetaFinder(
